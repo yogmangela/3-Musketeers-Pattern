@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Encryption and Decryption</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .output {
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Text Encryption & Decryption</h1>
+
+        <!-- Encrypt Section -->
+        <div>
+            <h2>Encrypt Text</h2>
+            <label for="textToEncrypt">Enter text to encrypt:</label>
+            <input type="text" id="textToEncrypt" placeholder="Enter text to encrypt">
+            <button onclick="encryptText()">Encrypt</button>
+
+            <div class="output" id="encryptedOutput"></div>
+        </div>
+
+        <!-- Decrypt Section -->
+        <div>
+            <h2>Decrypt Text</h2>
+            <label for="textToDecrypt">Enter encrypted text:</label>
+            <input type="text" id="textToDecrypt" placeholder="Enter encrypted text">
+            <button onclick="decryptText()">Decrypt</button>
+
+            <div class="output" id="decryptedOutput"></div>
+        </div>
+
+        <div id="errorOutput" class="error"></div>
+    </div>
+
+    <script>
+        // Function to encrypt the text
+        function encryptText() {
+            const text = document.getElementById("textToEncrypt").value;
+            if (!text) {
+                showError("Please enter text to encrypt.");
+                return;
+            }
+            
+            fetch('/encrypt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.encrypted_text) {
+                    document.getElementById("encryptedOutput").textContent = `Encrypted Text: ${data.encrypted_text}`;
+                    document.getElementById("errorOutput").textContent = '';
+                } else {
+                    document.getElementById("encryptedOutput").textContent = '';
+                    document.getElementById("errorOutput").textContent = 'Error encrypting text.';
+                }
+            })
+            .catch(error => {
+                document.getElementById("errorOutput").textContent = 'Error communicating with the server.';
+            });
+        }
+
+        // Function to decrypt the text
+        function decryptText() {
+            const encryptedText = document.getElementById("textToDecrypt").value;
+            if (!encryptedText) {
+                showError("Please enter encrypted text to decrypt.");
+                return;
+            }
+            
+            fetch('/decrypt', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ encrypted_text: encryptedText })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.decrypted_text) {
+                    document.getElementById("decryptedOutput").textContent = `Decrypted Text: ${data.decrypted_text}`;
+                    document.getElementById("errorOutput").textContent = '';
+                } else {
+                    document.getElementById("decryptedOutput").textContent = '';
+                    document.getElementById("errorOutput").textContent = 'Error decrypting text.';
+                }
+            })
+            .catch(error => {
+                document.getElementById("errorOutput").textContent = 'Error communicating with the server.';
+            });
+        }
+
+        // Function to display error message
+        function showError(message) {
+            document.getElementById("errorOutput").textContent = message;
+            document.getElementById("encryptedOutput").textContent = '';
+            document.getElementById("decryptedOutput").textContent = '';
+        }
+    </script>
+</body>
+</html>
